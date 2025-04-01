@@ -30,7 +30,45 @@ Assume that i1 and i2 are normalized grayscale images (values between 0 and 1).
 """
 
 import numpy as np
+MAX = 255
+
+def MSE(i1: np.ndarray, i2: np.ndarray) -> float:
+    return (np.square(i1-i2)).mean()
+
+def PSNR(i1: np.ndarray, i2: np.ndarray) -> float:
+    return 20 * np.log10(MAX) - 10 * np.log10(MSE(i1, i2))
+
+def SSIM(i1: np.ndarray, i2: np.ndarray) -> float:
+    mx = i1.mean()
+    my = i2.mean()
+    vx = i1.var()
+    vy = i2.var()
+    covMatrix = np.cov(i1.flatten(),i2.flatten())
+    cov = covMatrix[0][1]
+    k1 = 0.01
+    k2 = 0.03
+    L = 255
+    c1 = np.square(k1*L)
+    c2 = np.square(k2*L)
+    result = ((2*mx*my + c1)*(2*cov+c2))/((np.square(mx) + np.square(my) + c1)*(vx + vy + c2))
+    return result
+
+def NPCC(i1: np.ndarray, i2: np.ndarray) -> float:
+    covMatrix = np.cov(i1.flatten(),i2.flatten())
+    cov = covMatrix[0][1]
+    stdx = np.std(i1)
+    stdy = np.std(i2)
+    return cov/(stdx*stdy)
 
 def compare_images(i1: np.ndarray, i2: np.ndarray) -> dict:
     # Your implementation here
-    pass
+    args = (i1, i2)
+    result = {}
+    result["mse"] = MSE(args)
+    result["psnr"] = PSNR(args)
+    result["ssim"] = SSIM(args)
+    result["npcc"] = NPCC(args)
+    return result
+
+
+
